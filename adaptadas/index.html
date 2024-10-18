@@ -7,29 +7,12 @@
 
     2
 
-    <script>
-        async function fetchFiles() {
-            try {
-                const response = await fetch('/api/list-files'); // A API deve retornar os arquivos
-                const files = await response.json();
-
-                const list = document.getElementById('file-list');
-                files.forEach(file => {
-                    const listItem = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = '/adaptadas/' + file;
-                    link.textContent = file;
-                    listItem.appendChild(link);
-                    list.appendChild(listItem);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar arquivos:', error);
-            }
-        }
-
-        fetchFiles(); // Chama a função ao carregar a página
-
-    </script>
+    <h1>Lista de Arquivos na Pasta Adaptadas</h1>
+    <ul>
+        <li><a href="/adaptadas/atividade1.pdf">Atividade 1 (PDF)</a></li>
+        <li><a href="/adaptadas/atividade2.pdf">Atividade 2 (PDF)</a></li>
+        <li><a href="/adaptadas/atividade3.docx">Atividade 3 (DOCX)</a></li>
+    </ul>
     
 </body>
 </html>
