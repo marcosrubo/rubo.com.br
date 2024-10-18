@@ -1,44 +1,8 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Arquivos</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin: 5px 0; }
-        a { text-decoration: none; color: #007BFF; }
-        a:hover { text-decoration: underline; }
-    </style>
 </head>
 <body>
     <h1>Arquivos na Pasta Adaptadas</h1>
-    <ul id="file-list">
-        <!-- Os arquivos serão listados aqui -->
-    </ul>
-
-    <script>
-        async function fetchFiles() {
-            try {
-                const response = await fetch('/api/list-files'); // A API deve retornar os arquivos
-                const files = await response.json();
-
-                const list = document.getElementById('file-list');
-                files.forEach(file => {
-                    const listItem = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = '/adaptadas/' + file;
-                    link.textContent = file;
-                    listItem.appendChild(link);
-                    list.appendChild(listItem);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar arquivos:', error);
-            }
-        }
-
-        fetchFiles(); // Chama a função ao carregar a página
-    </script>
 </body>
 </html>
