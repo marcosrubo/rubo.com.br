@@ -19,9 +19,17 @@
       </div>
     </div>
 
-    <div class="topbar-actions">
+    <div class="topbar-actions" id="topbarActions">
       <button class="btn btn-secundario" id="btnEntrar">Entrar</button>
       <button class="btn btn-primario" id="btnCriarConta">Criar conta</button>
+    </div>
+
+    <div class="topbar-user hidden" id="topbarUser">
+      <div class="user-badge">
+        <span class="user-badge-label">Conectado como</span>
+        <strong id="userDisplayName">Usuário</strong>
+      </div>
+      <button class="btn btn-secundario" id="btnSair">Sair</button>
     </div>
   </header>
 
@@ -168,6 +176,67 @@
     <p>Portal RUBO • Estrutura central do ecossistema de sistemas</p>
   </footer>
 
+  <div class="modal-overlay hidden" id="modalEntrar">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h3>Entrar no Portal RUBO</h3>
+        <button class="btn-fechar-modal" type="button" data-close="modalEntrar">✕</button>
+      </div>
+
+      <form id="formEntrar" class="auth-form">
+        <div class="form-group">
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" name="email" placeholder="seuemail@exemplo.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" name="senha" placeholder="Digite sua senha" required />
+        </div>
+
+        <div class="auth-message hidden" id="loginMessage"></div>
+
+        <button class="btn btn-primario btn-form-full" type="submit" id="btnSubmitEntrar">
+          Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="modalCriarConta">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h3>Criar conta</h3>
+        <button class="btn-fechar-modal" type="button" data-close="modalCriarConta">✕</button>
+      </div>
+
+      <form id="formCriarConta" class="auth-form">
+        <div class="form-group">
+          <label for="cadastroNome">Nome</label>
+          <input type="text" id="cadastroNome" name="nome" placeholder="Seu nome completo" required />
+        </div>
+
+        <div class="form-group">
+          <label for="cadastroEmail">E-mail</label>
+          <input type="email" id="cadastroEmail" name="email" placeholder="seuemail@exemplo.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="cadastroSenha">Senha</label>
+          <input type="password" id="cadastroSenha" name="senha" placeholder="Crie uma senha" minlength="6" required />
+        </div>
+
+        <div class="auth-message hidden" id="cadastroMessage"></div>
+
+        <button class="btn btn-primario btn-form-full" type="submit" id="btnSubmitCriarConta">
+          Criar conta
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./app.js"></script>
 </body>
 </html>
+
