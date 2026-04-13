@@ -181,7 +181,7 @@ formCriarConta.addEventListener("submit", async (event) => {
       email,
       password: senha,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: "https://rubo.com.br",
         data: {
           nome
         }
