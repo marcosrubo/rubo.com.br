@@ -27,19 +27,23 @@ const btnSubmitEntrar = document.getElementById("btnSubmitEntrar");
 const btnSubmitCriarConta = document.getElementById("btnSubmitCriarConta");
 
 function abrirModal(modal) {
+  if (!modal) return;
   modal.classList.remove("hidden");
 }
 
 function fecharModal(modal) {
+  if (!modal) return;
   modal.classList.add("hidden");
 }
 
 function limparMensagem(elemento) {
+  if (!elemento) return;
   elemento.textContent = "";
   elemento.className = "auth-message hidden";
 }
 
 function mostrarMensagem(elemento, texto, tipo = "success") {
+  if (!elemento) return;
   elemento.textContent = texto;
   elemento.className = `auth-message ${tipo}`;
 }
@@ -78,15 +82,15 @@ async function carregarPerfil(user) {
 }
 
 function atualizarInterfaceLogado(profile, user) {
-  topbarActions.classList.add("hidden");
-  topbarUser.classList.remove("hidden");
-  userDisplayName.textContent = getDisplayName(profile, user);
+  if (topbarActions) topbarActions.classList.add("hidden");
+  if (topbarUser) topbarUser.classList.remove("hidden");
+  if (userDisplayName) userDisplayName.textContent = getDisplayName(profile, user);
 }
 
 function atualizarInterfaceDeslogado() {
-  topbarActions.classList.remove("hidden");
-  topbarUser.classList.add("hidden");
-  userDisplayName.textContent = "Usuário";
+  if (topbarActions) topbarActions.classList.remove("hidden");
+  if (topbarUser) topbarUser.classList.add("hidden");
+  if (userDisplayName) userDisplayName.textContent = "Usuário";
 }
 
 async function verificarSessaoAtual() {
@@ -128,63 +132,77 @@ function configurarTogglesSenha() {
   });
 }
 
-btnEntrar.addEventListener("click", () => {
-  limparMensagem(loginMessage);
-  formEntrar.reset();
+function resetCampoSenha(idInput, seletorToggle) {
+  const input = document.getElementById(idInput);
+  const toggle = document.querySelector(seletorToggle);
 
-  const loginSenha = document.getElementById("loginSenha");
-  const loginToggle = document.querySelector('.password-toggle[data-target="loginSenha"]');
-  if (loginSenha) loginSenha.type = "password";
-  if (loginToggle) {
-    loginToggle.textContent = "👁";
-    loginToggle.classList.remove("is-visible");
+  if (input) input.type = "password";
+  if (toggle) {
+    toggle.textContent = "👁";
+    toggle.classList.remove("is-visible");
   }
+}
 
-  abrirModal(modalEntrar);
-});
+if (btnEntrar) {
+  btnEntrar.addEventListener("click", () => {
+    limparMensagem(loginMessage);
+    if (formEntrar) formEntrar.reset();
 
-btnCriarConta.addEventListener("click", () => {
-  limparMensagem(cadastroMessage);
-  formCriarConta.reset();
+    resetCampoSenha("loginSenha", '.password-toggle[data-target="loginSenha"]');
 
-  const cadastroSenha = document.getElementById("cadastroSenha");
-  const cadastroToggle = document.querySelector('.password-toggle[data-target="cadastroSenha"]');
-  if (cadastroSenha) cadastroSenha.type = "password";
-  if (cadastroToggle) {
-    cadastroToggle.textContent = "👁";
-    cadastroToggle.classList.remove("is-visible");
-  }
+    abrirModal(modalEntrar);
+  });
+}
 
-  abrirModal(modalCriarConta);
-});
+if (btnCriarConta) {
+  btnCriarConta.addEventListener("click", () => {
+    limparMensagem(cadastroMessage);
+    if (formCriarConta) formCriarConta.reset();
 
-btnSaibaMais.addEventListener("click", () => {
-  const secaoSobre = document.getElementById("secaoSobre");
-  if (secaoSobre) {
-    secaoSobre.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-});
+    resetCampoSenha("cadastroSenha", '.password-toggle[data-target="cadastroSenha"]');
 
-btnSair.addEventListener("click", async () => {
-  const { error } = await supabaseClient.auth.signOut();
+    abrirModal(modalCriarConta);
+  });
+}
 
-  if (error) {
-    alert("Não foi possível sair da sessão.");
-    return;
-  }
+if (btnSaibaMais) {
+  btnSaibaMais.addEventListener("click", () => {
+    const secaoSobre = document.getElementById("secaoSobre");
+    if (secaoSobre) {
+      secaoSobre.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+}
 
-  atualizarInterfaceDeslogado();
-});
+if (btnSair) {
+  btnSair.addEventListener("click", async () => {
+    try {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        throw error;
+      }
+
+      atualizarInterfaceDeslogado();
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+      alert("Não foi possível sair da sessão.");
+    }
+  });
+}
 
 document.querySelectorAll("[data-close]").forEach((button) => {
   button.addEventListener("click", () => {
     const modalId = button.getAttribute("data-close");
     const modal = document.getElementById(modalId);
-    if (modal) fecharModal(modal);
+    fecharModal(modal);
   });
 });
 
 [modalEntrar, modalCriarConta].forEach((modal) => {
+  if (!modal) return;
+
   modal.addEventListener("click", (event) => {
     if (event.target === modal) {
       fecharModal(modal);
@@ -192,127 +210,127 @@ document.querySelectorAll("[data-close]").forEach((button) => {
   });
 });
 
-formCriarConta.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  limparMensagem(cadastroMessage);
+if (formCriarConta) {
+  formCriarConta.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    limparMensagem(cadastroMessage);
 
-  const nome = document.getElementById("cadastroNome").value.trim();
-  const email = document.getElementById("cadastroEmail").value.trim().toLowerCase();
-  const senha = document.getElementById("cadastroSenha").value;
+    const nome = document.getElementById("cadastroNome")?.value.trim();
+    const email = document.getElementById("cadastroEmail")?.value.trim().toLowerCase();
+    const senha = document.getElementById("cadastroSenha")?.value;
 
-  if (!nome || !email || !senha) {
-    mostrarMensagem(cadastroMessage, "Preencha todos os campos.", "error");
-    return;
-  }
+    if (!nome || !email || !senha) {
+      mostrarMensagem(cadastroMessage, "Preencha todos os campos.", "error");
+      return;
+    }
 
-  if (senha.length < 6) {
-    mostrarMensagem(cadastroMessage, "A senha deve ter pelo menos 6 caracteres.", "error");
-    return;
-  }
+    if (senha.length < 6) {
+      mostrarMensagem(cadastroMessage, "A senha deve ter pelo menos 6 caracteres.", "error");
+      return;
+    }
 
-  try {
-    btnSubmitCriarConta.disabled = true;
-    btnSubmitCriarConta.textContent = "Criando conta...";
-
-    const { error } = await supabaseClient.auth.signUp({
-      email,
-      password: senha,
-      options: {
-        emailRedirectTo: "https://rubo.com.br",
-        data: {
-          nome
-        }
+    try {
+      if (btnSubmitCriarConta) {
+        btnSubmitCriarConta.disabled = true;
+        btnSubmitCriarConta.textContent = "Criando conta...";
       }
-    });
 
-    if (error) {
-      throw error;
+      const { error } = await supabaseClient.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          emailRedirectTo: "https://rubo.com.br",
+          data: {
+            nome
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      mostrarMensagem(
+        cadastroMessage,
+        "Conta criada com sucesso. Verifique seu e-mail para confirmar o cadastro.",
+        "success"
+      );
+
+      formCriarConta.reset();
+      resetCampoSenha("cadastroSenha", '.password-toggle[data-target="cadastroSenha"]');
+    } catch (error) {
+      console.error("Erro ao criar conta:", error);
+      mostrarMensagem(
+        cadastroMessage,
+        error.message || "Não foi possível criar a conta.",
+        "error"
+      );
+    } finally {
+      if (btnSubmitCriarConta) {
+        btnSubmitCriarConta.disabled = false;
+        btnSubmitCriarConta.textContent = "Criar conta";
+      }
+    }
+  });
+}
+
+if (formEntrar) {
+  formEntrar.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    limparMensagem(loginMessage);
+
+    const email = document.getElementById("loginEmail")?.value.trim().toLowerCase();
+    const senha = document.getElementById("loginSenha")?.value;
+
+    if (!email || !senha) {
+      mostrarMensagem(loginMessage, "Informe e-mail e senha.", "error");
+      return;
     }
 
-    mostrarMensagem(
-      cadastroMessage,
-      "Conta criada com sucesso. Verifique seu e-mail para confirmar o cadastro.",
-      "success"
-    );
+    try {
+      if (btnSubmitEntrar) {
+        btnSubmitEntrar.disabled = true;
+        btnSubmitEntrar.textContent = "Entrando...";
+      }
 
-    formCriarConta.reset();
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password: senha
+      });
 
-    const cadastroSenha = document.getElementById("cadastroSenha");
-    const cadastroToggle = document.querySelector('.password-toggle[data-target="cadastroSenha"]');
-    if (cadastroSenha) cadastroSenha.type = "password";
-    if (cadastroToggle) {
-      cadastroToggle.textContent = "👁";
-      cadastroToggle.classList.remove("is-visible");
+      if (error) {
+        throw error;
+      }
+
+      const user = data?.user;
+
+      if (!user) {
+        throw new Error("Login não concluído.");
+      }
+
+      const profile = await carregarPerfil(user);
+
+      atualizarInterfaceLogado(profile, user);
+      fecharModal(modalEntrar);
+      formEntrar.reset();
+      resetCampoSenha("loginSenha", '.password-toggle[data-target="loginSenha"]');
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao entrar:", error);
+      mostrarMensagem(
+        loginMessage,
+        error.message || "Não foi possível entrar.",
+        "error"
+      );
+    } finally {
+      if (btnSubmitEntrar) {
+        btnSubmitEntrar.disabled = false;
+        btnSubmitEntrar.textContent = "Entrar";
+      }
     }
-  } catch (error) {
-    console.error("Erro ao criar conta:", error);
-    mostrarMensagem(
-      cadastroMessage,
-      error.message || "Não foi possível criar a conta.",
-      "error"
-    );
-  } finally {
-    btnSubmitCriarConta.disabled = false;
-    btnSubmitCriarConta.textContent = "Criar conta";
-  }
-});
-
-formEntrar.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  limparMensagem(loginMessage);
-
-  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const senha = document.getElementById("loginSenha").value;
-
-  if (!email || !senha) {
-    mostrarMensagem(loginMessage, "Informe e-mail e senha.", "error");
-    return;
-  }
-
-  try {
-    btnSubmitEntrar.disabled = true;
-    btnSubmitEntrar.textContent = "Entrando...";
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password: senha
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    const user = data?.user;
-
-    if (!user) {
-      throw new Error("Login não concluído.");
-    }
-
-    const profile = await carregarPerfil(user);
-
-    atualizarInterfaceLogado(profile, user);
-    fecharModal(modalEntrar);
-    formEntrar.reset();
-
-    const loginSenha = document.getElementById("loginSenha");
-    const loginToggle = document.querySelector('.password-toggle[data-target="loginSenha"]');
-    if (loginSenha) loginSenha.type = "password";
-    if (loginToggle) {
-      loginToggle.textContent = "👁";
-      loginToggle.classList.remove("is-visible");
-    }
-  } catch (error) {
-    console.error("Erro ao entrar:", error);
-    mostrarMensagem(
-      loginMessage,
-      error.message || "Não foi possível entrar.",
-      "error"
-    );
-  } finally {
-    btnSubmitEntrar.disabled = false;
-    btnSubmitEntrar.textContent = "Entrar";
-  }
-});
+  });
+}
 
 supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   if (session?.user) {
