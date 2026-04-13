@@ -109,15 +109,52 @@ async function verificarSessaoAtual() {
   atualizarInterfaceLogado(profile, session.user);
 }
 
+function configurarTogglesSenha() {
+  const toggles = document.querySelectorAll(".password-toggle");
+
+  toggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const targetId = toggle.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+
+      if (!input) return;
+
+      const mostrando = input.type === "text";
+      input.type = mostrando ? "password" : "text";
+
+      toggle.textContent = mostrando ? "👁" : "🙈";
+      toggle.classList.toggle("is-visible", !mostrando);
+    });
+  });
+}
+
 btnEntrar.addEventListener("click", () => {
   limparMensagem(loginMessage);
   formEntrar.reset();
+
+  const loginSenha = document.getElementById("loginSenha");
+  const loginToggle = document.querySelector('.password-toggle[data-target="loginSenha"]');
+  if (loginSenha) loginSenha.type = "password";
+  if (loginToggle) {
+    loginToggle.textContent = "👁";
+    loginToggle.classList.remove("is-visible");
+  }
+
   abrirModal(modalEntrar);
 });
 
 btnCriarConta.addEventListener("click", () => {
   limparMensagem(cadastroMessage);
   formCriarConta.reset();
+
+  const cadastroSenha = document.getElementById("cadastroSenha");
+  const cadastroToggle = document.querySelector('.password-toggle[data-target="cadastroSenha"]');
+  if (cadastroSenha) cadastroSenha.type = "password";
+  if (cadastroToggle) {
+    cadastroToggle.textContent = "👁";
+    cadastroToggle.classList.remove("is-visible");
+  }
+
   abrirModal(modalCriarConta);
 });
 
@@ -199,6 +236,14 @@ formCriarConta.addEventListener("submit", async (event) => {
     );
 
     formCriarConta.reset();
+
+    const cadastroSenha = document.getElementById("cadastroSenha");
+    const cadastroToggle = document.querySelector('.password-toggle[data-target="cadastroSenha"]');
+    if (cadastroSenha) cadastroSenha.type = "password";
+    if (cadastroToggle) {
+      cadastroToggle.textContent = "👁";
+      cadastroToggle.classList.remove("is-visible");
+    }
   } catch (error) {
     console.error("Erro ao criar conta:", error);
     mostrarMensagem(
@@ -248,6 +293,14 @@ formEntrar.addEventListener("submit", async (event) => {
     atualizarInterfaceLogado(profile, user);
     fecharModal(modalEntrar);
     formEntrar.reset();
+
+    const loginSenha = document.getElementById("loginSenha");
+    const loginToggle = document.querySelector('.password-toggle[data-target="loginSenha"]');
+    if (loginSenha) loginSenha.type = "password";
+    if (loginToggle) {
+      loginToggle.textContent = "👁";
+      loginToggle.classList.remove("is-visible");
+    }
   } catch (error) {
     console.error("Erro ao entrar:", error);
     mostrarMensagem(
@@ -270,6 +323,6 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   }
 });
 
+configurarTogglesSenha();
 verificarSessaoAtual();
-
 

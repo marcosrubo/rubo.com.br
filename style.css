@@ -499,6 +499,44 @@ body {
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 62px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 34px;
+  min-width: 42px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.password-toggle:hover {
+  background: #dbeafe;
+  transform: translateY(-50%) scale(1.02);
+}
+
+.password-toggle.is-visible {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .auth-message {
   margin: 4px 0 16px;
   padding: 12px 14px;
@@ -573,6 +611,15 @@ body {
 
   .auth-form {
     padding: 18px;
+  }
+
+  .password-wrapper input {
+    padding-right: 58px;
+  }
+
+  .password-toggle {
+    right: 7px;
+    min-width: 40px;
   }
 }
 
