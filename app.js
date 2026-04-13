@@ -49,6 +49,11 @@ function getDisplayName(profile, user) {
     return String(profile.nome).trim();
   }
 
+  const nomeMeta = user?.user_metadata?.nome;
+  if (nomeMeta && String(nomeMeta).trim()) {
+    return String(nomeMeta).trim();
+  }
+
   const email = user?.email || "";
   if (email.includes("@")) {
     return email.split("@")[0];
@@ -172,7 +177,7 @@ formCriarConta.addEventListener("submit", async (event) => {
     btnSubmitCriarConta.disabled = true;
     btnSubmitCriarConta.textContent = "Criando conta...";
 
-    const { data, error } = await supabaseClient.auth.signUp({
+    const { error } = await supabaseClient.auth.signUp({
       email,
       password: senha,
       options: {
@@ -185,26 +190,6 @@ formCriarConta.addEventListener("submit", async (event) => {
 
     if (error) {
       throw error;
-    }
-
-    const user = data?.user;
-
-    if (user) {
-      const { error: profileError } = await supabaseClient
-        .from("profiles")
-        .upsert([
-          {
-            id: user.id,
-            nome,
-            email,
-            tipo_usuario: "usuario",
-            ativo: true
-          }
-        ], { onConflict: "id" });
-
-      if (profileError) {
-        throw profileError;
-      }
     }
 
     mostrarMensagem(
@@ -276,7 +261,7 @@ formEntrar.addEventListener("submit", async (event) => {
   }
 });
 
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
+supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   if (session?.user) {
     const profile = await carregarPerfil(session.user);
     atualizarInterfaceLogado(profile, session.user);
@@ -286,4 +271,5 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
 });
 
 verificarSessaoAtual();
+
 
