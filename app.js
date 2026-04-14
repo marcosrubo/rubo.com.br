@@ -67,18 +67,23 @@ function getDisplayName(profile, user) {
 }
 
 async function carregarPerfil(user) {
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Erro ao carregar perfil:", error);
+    if (error) {
+      console.error("Erro ao carregar perfil:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Erro inesperado ao carregar perfil:", error);
     return null;
   }
-
-  return data;
 }
 
 function atualizarInterfaceLogado(profile, user) {
@@ -94,23 +99,28 @@ function atualizarInterfaceDeslogado() {
 }
 
 async function verificarSessaoAtual() {
-  const { data, error } = await supabaseClient.auth.getSession();
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
 
-  if (error) {
-    console.error("Erro ao verificar sessão:", error);
+    if (error) {
+      console.error("Erro ao verificar sessão:", error);
+      atualizarInterfaceDeslogado();
+      return;
+    }
+
+    const session = data?.session;
+
+    if (!session?.user) {
+      atualizarInterfaceDeslogado();
+      return;
+    }
+
+    const profile = await carregarPerfil(session.user);
+    atualizarInterfaceLogado(profile, session.user);
+  } catch (error) {
+    console.error("Erro inesperado ao verificar sessão:", error);
     atualizarInterfaceDeslogado();
-    return;
   }
-
-  const session = data?.session;
-
-  if (!session?.user) {
-    atualizarInterfaceDeslogado();
-    return;
-  }
-
-  const profile = await carregarPerfil(session.user);
-  atualizarInterfaceLogado(profile, session.user);
 }
 
 function configurarTogglesSenha() {
@@ -149,7 +159,6 @@ if (btnEntrar) {
     if (formEntrar) formEntrar.reset();
 
     resetCampoSenha("loginSenha", '.password-toggle[data-target="loginSenha"]');
-
     abrirModal(modalEntrar);
   });
 }
@@ -160,7 +169,6 @@ if (btnCriarConta) {
     if (formCriarConta) formCriarConta.reset();
 
     resetCampoSenha("cadastroSenha", '.password-toggle[data-target="cadastroSenha"]');
-
     abrirModal(modalCriarConta);
   });
 }
@@ -179,12 +187,10 @@ if (btnSair) {
     try {
       const { error } = await supabaseClient.auth.signOut();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       atualizarInterfaceDeslogado();
-      window.location.reload();
+      window.location.href = "https://rubo.com.br";
     } catch (error) {
       console.error("Erro ao sair:", error);
       alert("Não foi possível sair da sessão.");
@@ -240,15 +246,11 @@ if (formCriarConta) {
         password: senha,
         options: {
           emailRedirectTo: "https://rubo.com.br",
-          data: {
-            nome
-          }
+          data: { nome }
         }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       mostrarMensagem(
         cadastroMessage,
@@ -298,24 +300,14 @@ if (formEntrar) {
         password: senha
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
+      if (!data?.user) throw new Error("Login não concluído.");
 
-      const user = data?.user;
-
-      if (!user) {
-        throw new Error("Login não concluído.");
-      }
-
-      const profile = await carregarPerfil(user);
-
-      atualizarInterfaceLogado(profile, user);
       fecharModal(modalEntrar);
       formEntrar.reset();
       resetCampoSenha("loginSenha", '.password-toggle[data-target="loginSenha"]');
 
-      window.location.reload();
+      window.location.href = "https://rubo.com.br";
     } catch (error) {
       console.error("Erro ao entrar:", error);
       mostrarMensagem(
@@ -332,13 +324,9 @@ if (formEntrar) {
   });
 }
 
-supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-  if (session?.user) {
-    const profile = await carregarPerfil(session.user);
-    atualizarInterfaceLogado(profile, session.user);
-  } else {
-    atualizarInterfaceDeslogado();
-  }
+supabaseClient.auth.onAuthStateChange((_event, _session) => {
+  // Deixamos a página recarregar/redirecionar no sucesso.
+  // Isso evita travamentos visuais no modal.
 });
 
 configurarTogglesSenha();
