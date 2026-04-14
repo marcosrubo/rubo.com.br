@@ -5,6 +5,8 @@ const supabaseClient = createClient(
   "sb_publishable_BU6qFD5MDhuUvybtf-ehkw_--JRKqTY"
 );
 
+const URL_ATIVIDADES_BASE = "https://atividades-escolares-frontend.vercel.app";
+
 const btnEntrar = document.getElementById("btnEntrar");
 const btnCriarConta = document.getElementById("btnCriarConta");
 const btnSaibaMais = document.getElementById("btnSaibaMais");
@@ -25,6 +27,9 @@ const cadastroMessage = document.getElementById("cadastroMessage");
 
 const btnSubmitEntrar = document.getElementById("btnSubmitEntrar");
 const btnSubmitCriarConta = document.getElementById("btnSubmitCriarConta");
+
+const linkAtividadesHero = document.getElementById("linkAtividadesHero");
+const linkAtividadesCard = document.getElementById("linkAtividadesCard");
 
 function abrirModal(modal) {
   if (!modal) return;
@@ -98,6 +103,31 @@ function atualizarInterfaceDeslogado() {
   if (userDisplayName) userDisplayName.textContent = "Usuário";
 }
 
+function construirUrlAtividades({ profile = null, user = null } = {}) {
+  const params = new URLSearchParams();
+  params.set("origem", "portal");
+
+  const nome = getDisplayName(profile, user);
+
+  if (user) {
+    params.set("modo", "logado");
+    params.set("nome", nome);
+  } else {
+    params.set("modo", "anonimo");
+  }
+
+  return `${URL_ATIVIDADES_BASE}/?${params.toString()}`;
+}
+
+function configurarLinksAtividades({ profile = null, user = null } = {}) {
+  const url = construirUrlAtividades({ profile, user });
+
+  [linkAtividadesHero, linkAtividadesCard].forEach((link) => {
+    if (!link) return;
+    link.href = url;
+  });
+}
+
 async function verificarSessaoAtual() {
   try {
     const { data, error } = await supabaseClient.auth.getSession();
@@ -105,6 +135,7 @@ async function verificarSessaoAtual() {
     if (error) {
       console.error("Erro ao verificar sessão:", error);
       atualizarInterfaceDeslogado();
+      configurarLinksAtividades();
       return;
     }
 
@@ -112,14 +143,17 @@ async function verificarSessaoAtual() {
 
     if (!session?.user) {
       atualizarInterfaceDeslogado();
+      configurarLinksAtividades();
       return;
     }
 
     const profile = await carregarPerfil(session.user);
     atualizarInterfaceLogado(profile, session.user);
+    configurarLinksAtividades({ profile, user: session.user });
   } catch (error) {
     console.error("Erro inesperado ao verificar sessão:", error);
     atualizarInterfaceDeslogado();
+    configurarLinksAtividades();
   }
 }
 
@@ -190,6 +224,7 @@ if (btnSair) {
       if (error) throw error;
 
       atualizarInterfaceDeslogado();
+      configurarLinksAtividades();
       window.location.href = "https://rubo.com.br";
     } catch (error) {
       console.error("Erro ao sair:", error);
@@ -303,6 +338,10 @@ if (formEntrar) {
       if (error) throw error;
       if (!data?.user) throw new Error("Login não concluído.");
 
+      const profile = await carregarPerfil(data.user);
+
+      configurarLinksAtividades({ profile, user: data.user });
+
       fecharModal(modalEntrar);
       formEntrar.reset();
       resetCampoSenha("loginSenha", '.password-toggle[data-target="loginSenha"]');
@@ -325,10 +364,10 @@ if (formEntrar) {
 }
 
 supabaseClient.auth.onAuthStateChange((_event, _session) => {
-  // Deixamos a página recarregar/redirecionar no sucesso.
-  // Isso evita travamentos visuais no modal.
+  // Mantemos a atualização pelo carregamento da página.
 });
 
 configurarTogglesSenha();
+configurarLinksAtividades();
 verificarSessaoAtual();
 
